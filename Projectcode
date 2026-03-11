@@ -1,0 +1,583 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 132,
+   "id": "72d77a61",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#DATA CLEANING \n",
+    "#IMPORTING LIBRARIES\n",
+    "\n",
+    "import pandas as pd\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 134,
+   "id": "bee6b197",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Data Loaded Successfully\n"
+     ]
+    }
+   ],
+   "source": [
+    "#DATA LOADING\n",
+    "\n",
+    "sales = pd.read_csv(r\"C:\\Users\\pavan\\OneDrive\\Desktop\\Retail_Sales_Capstone\\data\\RAW\\salesdata.csv\")\n",
+    "customers = pd.read_csv(r\"C:\\Users\\pavan\\OneDrive\\Desktop\\Retail_Sales_Capstone\\data\\RAW\\customers.csv\")\n",
+    "products = pd.read_csv(r\"C:\\Users\\pavan\\OneDrive\\Desktop\\Retail_Sales_Capstone\\data\\RAW\\products.csv\")\n",
+    "stores = pd.read_csv(r\"C:\\Users\\pavan\\OneDrive\\Desktop\\Retail_Sales_Capstone\\data\\RAW\\stores.csv\")\n",
+    "returns = pd.read_csv(r\"C:\\Users\\pavan\\OneDrive\\Desktop\\Retail_Sales_Capstone\\data\\RAW\\returns.csv\")\n",
+    "\n",
+    "print(\"Data Loaded Successfully\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 135,
+   "id": "e66fe50f",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "SALES\n",
+      "  order_id  order_date customer_id product_id store_id sales_channel  \\\n",
+      "0   O00000  31-01-2025       C0125      P1086      NaN        Online   \n",
+      "1   O00001  29-09-2025       C0633      P0973     S042      In-Store   \n",
+      "2   O00002  29-08-2024       C0653      P0659      NaN        Online   \n",
+      "3   O00003  13-05-2025       C0753      P0666     S014      In-Store   \n",
+      "4   O00004  22-07-2025       C0627      P0166     S017      In-Store   \n",
+      "\n",
+      "   quantity  unit_price  discount_pct  total_amount  \n",
+      "0         2       80.63          0.05        153.20  \n",
+      "1        20      209.16          0.05       3974.00  \n",
+      "2         2      218.60          0.10        393.48  \n",
+      "3         1       78.53          0.20         62.82  \n",
+      "4         1      344.93          0.20        275.94  \n",
+      "\n",
+      "Shape: (3060, 10)\n",
+      "\n",
+      "Missing Values:\n",
+      " order_id           0\n",
+      "order_date         0\n",
+      "customer_id        0\n",
+      "product_id         0\n",
+      "store_id         992\n",
+      "sales_channel      0\n",
+      "quantity           0\n",
+      "unit_price         0\n",
+      "discount_pct       0\n",
+      "total_amount       0\n",
+      "dtype: int64\n",
+      "\n",
+      "Duplicates: 60\n",
+      "CUSTOMERS\n",
+      "  customer_id first_name last_name  gender   age signup_date region\n",
+      "0       C0000    Patrick    Morgan    Male  18.0  11-07-2025  South\n",
+      "1       C0001       Eric       Lee   Other  36.0  20-09-2021   East\n",
+      "2       C0002     Thomas      Pena  Female   NaN  07-03-2022   East\n",
+      "3       C0003     Dalton     Duran    Male  24.0  29-08-2022  South\n",
+      "4       C0004     Travis   Mcclain    Male  50.0  29-03-2024  South\n",
+      "\n",
+      "Shape: (816, 7)\n",
+      "\n",
+      "Missing Values:\n",
+      " customer_id     0\n",
+      "first_name      0\n",
+      "last_name       0\n",
+      "gender          0\n",
+      "age            40\n",
+      "signup_date     0\n",
+      "region          0\n",
+      "dtype: int64\n",
+      "\n",
+      "Duplicates: 16\n",
+      "PRODUCTS\n",
+      "  product_id           product_name     category   brand  cost_price  \\\n",
+      "0      P0000        BrandA Shoulder  Electronics  BrandC       52.75   \n",
+      "1      P0001  BrandA Responsibility  Electronics  BrandD       11.20   \n",
+      "2      P0002           BrandB Small  Electronics  BrandB      144.62   \n",
+      "3      P0003        BrandD Continue      Apparel  BrandD      119.91   \n",
+      "4      P0004          BrandA Indeed      Apparel  BrandD       71.35   \n",
+      "\n",
+      "   unit_price  margin_pct  \n",
+      "0       64.65       18.41  \n",
+      "1       13.26       15.54  \n",
+      "2      250.37       42.24  \n",
+      "3      219.25       45.31  \n",
+      "4       88.47       19.35  \n",
+      "\n",
+      "Shape: (1224, 7)\n",
+      "\n",
+      "Missing Values:\n",
+      " product_id       0\n",
+      "product_name     0\n",
+      "category         0\n",
+      "brand           60\n",
+      "cost_price       0\n",
+      "unit_price       0\n",
+      "margin_pct       0\n",
+      "dtype: int64\n",
+      "\n",
+      "Duplicates: 24\n",
+      "STORES\n",
+      "  store_id                 store_name store_type region         city  \\\n",
+      "0     S000          Vincent Inc Store  Franchise   West      Chicago   \n",
+      "1     S001           Wilson Inc Store   Flagship   East      Chicago   \n",
+      "2     S002  Washington-Trujillo Store  Franchise  North  Los Angeles   \n",
+      "3     S003     Santana and Sons Store  Franchise  South      Phoenix   \n",
+      "4     S004       Oconnor-Rhodes Store  Franchise   East  Los Angeles   \n",
+      "\n",
+      "   operating_cost  \n",
+      "0        62538.56  \n",
+      "1        26957.43  \n",
+      "2        66101.63  \n",
+      "3        71089.40  \n",
+      "4        40965.26  \n",
+      "\n",
+      "Shape: (61, 6)\n",
+      "\n",
+      "Missing Values:\n",
+      " store_id          0\n",
+      "store_name        0\n",
+      "store_type        0\n",
+      "region            0\n",
+      "city              0\n",
+      "operating_cost    0\n",
+      "dtype: int64\n",
+      "\n",
+      "Duplicates: 1\n",
+      "RETURNS\n",
+      "  return_id order_id return_date     return_reason\n",
+      "0     R0000   O02237  05-03-2025         Defective\n",
+      "1     R0001   O01700  18-03-2025         Defective\n",
+      "2     R0002   O01451  18-02-2025     Late Delivery\n",
+      "3     R0003   O02759  26-10-2024         Defective\n",
+      "4     R0004   O00415  06-08-2025  No Longer Needed\n",
+      "\n",
+      "Shape: (204, 4)\n",
+      "\n",
+      "Missing Values:\n",
+      " return_id        0\n",
+      "order_id         0\n",
+      "return_date      0\n",
+      "return_reason    0\n",
+      "dtype: int64\n",
+      "\n",
+      "Duplicates: 4\n"
+     ]
+    }
+   ],
+   "source": [
+    "#data overview\n",
+    "datasets = {\n",
+    "    \"sales\": sales,\n",
+    "    \"customers\": customers,\n",
+    "    \"products\": products,\n",
+    "    \"stores\": stores,\n",
+    "    \"returns\": returns\n",
+    "}\n",
+    "\n",
+    "for name, df in datasets.items():\n",
+    "    print(name.upper())\n",
+    "    print(df.head())\n",
+    "    print(\"\\nShape:\", df.shape)\n",
+    "    print(\"\\nMissing Values:\\n\", df.isnull().sum())\n",
+    "    print(\"\\nDuplicates:\", df.duplicated().sum())\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 136,
+   "id": "a693b97f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Standardize Column Names\n",
+    "def clean_columns(df):\n",
+    "    df.columns = df.columns.str.lower().str.strip().str.replace(\" \", \"_\")\n",
+    "    return df\n",
+    "\n",
+    "sales = clean_columns(sales)\n",
+    "customers = clean_columns(customers)\n",
+    "products = clean_columns(products)\n",
+    "stores = clean_columns(stores)\n",
+    "returns = clean_columns(returns)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 141,
+   "id": "38e7b184",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Convert Data Types\n",
+    "sales['order_id'] = sales['order_id'].astype(str)\n",
+    "sales['customer_id'] = sales['customer_id'].astype(str)\n",
+    "sales['product_id'] = sales['product_id'].astype(str)\n",
+    "\n",
+    "sales['order_date'] = pd.to_datetime(sales['order_date'], errors='coerce')\n",
+    "sales['quantity'] = pd.to_numeric(sales['quantity'], errors='coerce')\n",
+    "sales['unit_price'] = pd.to_numeric(sales['unit_price'], errors='coerce')\n",
+    "sales['discount_pct'] = pd.to_numeric(sales['discount_pct'], errors='coerce')\n",
+    "sales['total_amount'] = pd.to_numeric(sales['total_amount'], errors='coerce')\n",
+    "\n",
+    "customers['signup_date'] = pd.to_datetime(customers['signup_date'], errors='coerce')\n",
+    "customers['age'] = pd.to_numeric(customers['age'], errors='coerce')\n",
+    "\n",
+    "products['cost_price'] = pd.to_numeric(products['cost_price'], errors='coerce').astype(float)\n",
+    "products['unit_price'] = pd.to_numeric(products['unit_price'], errors='coerce').astype(float)\n",
+    "\n",
+    "returns['return_date'] = pd.to_datetime(returns['return_date'], errors='coerce')\n",
+    "\n",
+    "\n",
+    "stores['operating_cost'] = pd.to_numeric(stores['operating_cost'], errors='coerce').astype(float)\n",
+    "\n",
+    "\n",
+    "\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 142,
+   "id": "87d3d916",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Remove Duplicates\n",
+    "sales.drop_duplicates(subset=['order_id'], inplace=True)\n",
+    "customers.drop_duplicates(subset=['customer_id'], inplace=True)\n",
+    "products.drop_duplicates(subset=['product_id'], inplace=True)\n",
+    "stores.drop_duplicates(subset=['store_id'], inplace=True)\n",
+    "returns.drop_duplicates(subset=['return_id'], inplace=True)\n",
+    "\n",
+    "\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 143,
+   "id": "2c532e9a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Handle Missing Values\n",
+    "sales['discount_pct'].fillna(0, inplace=True)\n",
+    "sales['store_id'].fillna(\"Online\", inplace=True)\n",
+    "\n",
+    "sales.dropna(subset=['order_date'], inplace=True)\n",
+    "sales.dropna(subset=['order_id','customer_id','product_id'], inplace=True)\n",
+    "\n",
+    "\n",
+    "#customers.dropna(subset=['customer_id'], inplace=True)\n",
+    "products.dropna(subset=['product_id'], inplace=True)\n",
+    "\n",
+    "products.dropna(subset=['brand'],inplace=True)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 144,
+   "id": "28637ff8",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "order_id         0\n",
+       "order_date       0\n",
+       "customer_id      0\n",
+       "product_id       0\n",
+       "store_id         0\n",
+       "sales_channel    0\n",
+       "quantity         0\n",
+       "unit_price       0\n",
+       "discount_pct     0\n",
+       "total_amount     0\n",
+       "dtype: int64"
+      ]
+     },
+     "execution_count": 144,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "sales['store_id'].fillna(\"Online\", inplace=True)\n",
+    "\n",
+    "sales.isnull().sum()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 145,
+   "id": "0fed0557",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Remove Invalid Values\n",
+    "sales = sales[sales['quantity'] > 0]\n",
+    "sales = sales[sales['unit_price'] >= 0]\n",
+    "sales = sales[sales['total_amount'] >= 0]\n",
+    "sales = sales[(sales['discount_pct'] >= 0) & (sales['discount_pct'] <= 100)]\n",
+    "\n",
+    "\n",
+    "\n",
+    "\n",
+    "customers = customers[(customers['age'] >= 10) & (customers['age'] <= 100)]\n",
+    "products = products[products['cost_price'] >= 0]\n",
+    "products = products[products['unit_price'] >= 0]\n",
+    "products = products[products['unit_price'] >= products['cost_price']]\n",
+    "\n",
+    "stores = stores[stores['operating_cost'] >= 0]\n",
+    "\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 146,
+   "id": "4a5ff4bd",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Create New Columns\n",
+    "#profit column \n",
+    "\n",
+    "products['profitper_unit'] = products['unit_price'] * products['cost_price']\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 147,
+   "id": "1d350a70",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "\n",
+    "sales['total_amount'] = sales['total_amount'].round(2)\n",
+    "products['profitper_unit'] = products['profitper_unit'].round(2)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 149,
+   "id": "cdfe646b",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "C:\\Users\\pavan\\AppData\\Local\\Temp\\ipykernel_26300\\1766588187.py:4: SettingWithCopyWarning: \n",
+      "A value is trying to be set on a copy of a slice from a DataFrame.\n",
+      "Try using .loc[row_indexer,col_indexer] = value instead\n",
+      "\n",
+      "See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n",
+      "  customers['age_group'] = pd.cut(customers['age'], bins=bins, labels=labels)\n"
+     ]
+    }
+   ],
+   "source": [
+    "#Age Group\n",
+    "bins = [0,25,35,50,100]\n",
+    "labels = ['18-25','26-35','36-50','50+']\n",
+    "customers['age_group'] = pd.cut(customers['age'], bins=bins, labels=labels)\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 150,
+   "id": "46730a81",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Month & Year\n",
+    "sales['order_month'] = sales['order_date'].dt.month\n",
+    "sales['order_year'] = sales['order_date'].dt.year\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 151,
+   "id": "1c1decf9",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "Monthly Sales:\n",
+      "order_month\n",
+      "1     62496.20\n",
+      "2     73323.86\n",
+      "3     69231.78\n",
+      "4     74985.88\n",
+      "5     72852.98\n",
+      "6     63761.94\n",
+      "7     60931.59\n",
+      "8     75801.44\n",
+      "9     76228.63\n",
+      "10    71984.87\n",
+      "11    53981.70\n",
+      "12    61612.77\n",
+      "Name: total_amount, dtype: float64\n",
+      "\n",
+      "Top Products:\n",
+      "product_id\n",
+      "P0820    40\n",
+      "P0053    33\n",
+      "P0336    33\n",
+      "P0874    32\n",
+      "P1123    27\n",
+      "Name: quantity, dtype: int64\n",
+      "\n",
+      "Sales by Channel:\n",
+      "sales_channel\n",
+      "In-Store    577835.01\n",
+      "Online      239358.63\n",
+      "Name: total_amount, dtype: float64\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(\"\\nMonthly Sales:\")\n",
+    "print(sales.groupby('order_month')['total_amount'].sum())\n",
+    "\n",
+    "print(\"\\nTop Products:\")\n",
+    "print(sales.groupby('product_id')['quantity'].sum().sort_values(ascending=False).head())\n",
+    "\n",
+    "print(\"\\nSales by Channel:\")\n",
+    "print(sales.groupby('sales_channel')['total_amount'].sum())\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 152,
+   "id": "fe51d758",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Cleaned Data Saved Successfully\n"
+     ]
+    }
+   ],
+   "source": [
+    "#cleaned data\n",
+    "sales.to_csv(\"sales_cleaned.csv\", index=False)\n",
+    "customers.to_csv(\"customers_cleaned.csv\", index=False)\n",
+    "products.to_csv(\"products_cleaned.csv\", index=False)\n",
+    "stores.to_csv(\"stores_cleaned.csv\", index=False)\n",
+    "returns.to_csv(\"returns_cleaned.csv\", index=False)\n",
+    "\n",
+    "print(\"Cleaned Data Saved Successfully\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 153,
+   "id": "a577b831",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "FINAL SHAPES\n",
+      "Sales: (2994, 12)\n",
+      "Customers: (760, 8)\n",
+      "Products: (1140, 8)\n",
+      "Stores: (60, 6)\n",
+      "Returns: (200, 4)\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(\"\\nFINAL SHAPES\")\n",
+    "print(\"Sales:\", sales.shape)\n",
+    "print(\"Customers:\", customers.shape)\n",
+    "print(\"Products:\", products.shape)\n",
+    "print(\"Stores:\", stores.shape)\n",
+    "print(\"Returns:\", returns.shape)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 154,
+   "id": "a6f318e6",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "'C:\\\\Users\\\\pavan\\\\Downloads'"
+      ]
+     },
+     "execution_count": 154,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "import os\n",
+    "os.getcwd()\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "6f2b1c0e",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "ac09991b",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.9.13"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
